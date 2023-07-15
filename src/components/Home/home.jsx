@@ -1,39 +1,47 @@
 import { useEffect, useState } from "react";
-import { logMovies } from "../../service/service";
+import { useNavigate } from "react-router-dom";
+import { getPodcastListService } from "../../service/service";
 
 const Home = () => {
+  const navigate = useNavigate();
+
   const [podacastList, setPodcastList] = useState([]);
+  const [oldPodcastList, setOldPodcastList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [textFilter, setText] = useState('');
-  const getPodcastlist  = () => {
-    logMovies().then((response, reject) => {
-        if (response) {
-          setPodcastList(JSON.parse(response.contents).feed.entry);
-          setLoading(false);
-        }
-      });
-  }
+  const [textFilter, setText] = useState("");
+  const getPodcastlist = () => {
+    getPodcastListService().then((response, reject) => {
+      if (response) {
+        setPodcastList(JSON.parse(response.contents).feed.entry);
+        setOldPodcastList(JSON.parse(response.contents).feed.entry);
+        setLoading(false);
+      }
+    });
+  };
   useEffect(() => {
     getPodcastlist();
   }, []);
   useEffect(() => {
     setLoading(true);
     if (textFilter) {
-        const dataFiltered = podacastList.filter((podcast) => podcast["im:artist"].label.includes(textFilter)
-          || podcast["im:name"].label.includes(textFilter));
-        setPodcastList(dataFiltered ?? getPodcastlist());
-        setLoading(false);
+      const dataFiltered = oldPodcastList.filter(
+        (podcast) =>
+          podcast["im:artist"].label.includes(textFilter) ||
+          podcast["im:name"].label.includes(textFilter)
+      );
+      setPodcastList(dataFiltered ?? getPodcastlist());
+      setLoading(false);
     }
-    if(!textFilter) {
-        setPodcastList(getPodcastlist());
+    if (!textFilter) {
+      setPodcastList(getPodcastlist());
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [textFilter])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [textFilter]);
   return (
     <>
       {loading ? (
-        <div className="spinner-border p-5 mx-auto" role="status">
-          <span className="sr-only p-5" />
+        <div className="spinner-border p-5" role="status">
+          <span className="sr-only" />
         </div>
       ) : (
         <div className="container-fluid">
@@ -43,18 +51,27 @@ const Home = () => {
                 <span className="navbar-brand mb-0 h1">Podcaster</span>
               </nav>
               <form className="form-inline d-flex flex-row-reverse">
-                    <input
-                      className="form-control mr-sm-2 w-25"
-                      type="Filter Podcast"
-                      onChange={(e) => setText(e.target.value)}
-                      placeholder="Search"
-                      aria-label="Search"
-                    />
-                  </form>
+                <input
+                  className="form-control mr-sm-2 w-25"
+                  type="Filter Podcast"
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="Search"
+                  aria-label="Search"
+                />
+              </form>
               {Boolean(podacastList?.length) ? (
                 <div className="d-flex row p-5">
                   {podacastList.map((podcast, index) => (
-                    <div className="col-3 h-50" key={index}>
+                    <div
+                      className="col-3 h-50"
+                      style={{ cursor: "pointer" }}
+                      key={index}
+                      onClick={() =>
+                        navigate(`/podcast/${podcast.id.attributes["im:id"]}`, {
+                          state: { podcast },
+                        })
+                      }
+                    >
                       <div className="card mt-5" style={{ width: "12rem" }}>
                         <img
                           className="rounded-circle"
@@ -73,7 +90,9 @@ const Home = () => {
                     </div>
                   ))}
                 </div>
-              ) : <div>NOT FOUND</div>}
+              ) : (
+                <div>NOT FOUND</div>
+              )}
             </div>
           </div>
         </div>
