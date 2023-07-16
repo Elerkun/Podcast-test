@@ -21,8 +21,8 @@ const Episode = () => {
                 <p className="card-text">
                   {location.state.episode.description}
                 </p>
-                <div class="embed-responsive embed-responsive-21by9">
-                  <iframe style={{ width: "50rem" }} class="embed-responsive-item" src={location.state.episode.episodeUrl} />
+                <div className="embed-responsive embed-responsive-21by9">
+                  <iframe style={{ width: "50rem" }} className="embed-responsive-item" src={location.state.episode.episodeUrl} />
                 </div>
               </div>
             </div>
