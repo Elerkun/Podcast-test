@@ -3,6 +3,7 @@ import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./components/Home/home";
 import PodcastDetails from "./components/Details/podcastDetails";
+import Episode from "./components/Details/Episode/Episode";
 
 function App() {
   return (
@@ -11,7 +12,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/podcast/:podcastId" element={<PodcastDetails />} />
-          {/* <Route path='/about' component={About} /> */}
+          <Route path="/podcast/:podcastId/episode/:episodeId" element={<Episode />} />
         </Routes>
       </BrowserRouter>
     </div>

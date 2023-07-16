@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
-import { getListOfEpisode, getPodcastDetailService } from "../../service/service";
-import { useLocation } from "react-router-dom";
+import {
+  getListOfEpisode,
+  getPodcastDetailService,
+} from "../../service/service";
+import { useLocation, useNavigate } from "react-router-dom";
 import { convertMsToTime } from "./utils";
+import PodcastDetailsCard from "./podcastDetailCards/podcastDetailCard";
 
 const PodcastDetails = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [podcastDetails, setPodcastDetails] = useState([]);
   const [listOfEpisode, setListOfEpisode] = useState([]);
@@ -22,6 +27,7 @@ const PodcastDetails = () => {
 
   useEffect(() => {
     getPodcastDetail();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     if (podcastDetails?.results?.length) {
@@ -35,6 +41,7 @@ const PodcastDetails = () => {
         }
       );
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [podcastDetails]);
   return (
     <>
@@ -46,25 +53,7 @@ const PodcastDetails = () => {
         <div className="container-fluid">
           <div className="d-flex flex-row">
             <div className="p-5 mx-auto w-75">
-              {podcastDetails.results && (
-                <div className="card" style={{ width: "18rem" }}>
-                  <img
-                    className="card-img-top"
-                    src={podcastDetails.results[0].artworkUrl600}
-                    alt="Card Detail"
-                  />
-                  <div className="card-body">
-                    <h5 className="card-title">
-                      {podcastDetails.results[0].artistName}
-                    </h5>
-                    <p className="card-text">
-                      {`${"Description"}: ${
-                        location.state.podcast.summary.label
-                      }`}
-                    </p>
-                  </div>
-                </div>
-              )}
+              <PodcastDetailsCard podcastDetails={podcastDetails} podcast={location.state.podcast}/>
             </div>
             <div className="p-5 mx-auto w-75">
               {listOfEpisode.results && (
@@ -86,10 +75,31 @@ const PodcastDetails = () => {
                     </thead>
                     <tbody>
                       {listOfEpisode.results &&
-                        listOfEpisode.results.map((episode) => (
-                          <tr>
-                            <td>{episode.trackName}</td>
-                            <td>{new Date(episode.releaseDate).toLocaleString()}</td>
+                        listOfEpisode.results.map((episode, index) => (
+                          <tr key={index}>
+                            <td
+                              onClick={() =>
+                                navigate(
+                                  `/podcast/${
+                                    location.state.podcast.id.attributes[
+                                      "im:id"
+                                    ]
+                                  }/episode/${episode.trackName.replaceAll(
+                                    " ",
+                                    "-"
+                                  )}`,
+                                  {
+                                    state: { episode, podcastDetails, podcast: location.state.podcast},
+
+                                  }
+                                )
+                              }
+                            >
+                              {episode.trackName}
+                            </td>
+                            <td>
+                              {new Date(episode.releaseDate).toLocaleString()}
+                            </td>
                             <td>{convertMsToTime(episode.trackTimeMillis)}</td>
                           </tr>
                         ))}
